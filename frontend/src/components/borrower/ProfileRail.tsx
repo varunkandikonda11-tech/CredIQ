@@ -1,7 +1,9 @@
 import { formatFeatureValue } from "@/lib/featureLabels";
+import { formatMoney, fromCanonicalUsd } from "@/lib/currency";
 import { debtBurdenRatio, formatDebtBurden } from "@/lib/profileMetrics";
 import { cn } from "@/lib/utils";
 import { Surface } from "@/components/ui/surface";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useAnimatedNumber } from "@/hooks/useAnimatedNumber";
 import type { BorrowerInput } from "@/types/api";
 
@@ -63,8 +65,11 @@ function MetaRow({
 }
 
 export function ProfileRail({ profile, className }: ProfileRailProps) {
-  const debt = useAnimatedNumber(profile.outstandingDebt);
-  const loan = useAnimatedNumber(profile.loanAmount);
+  const { currency } = useCurrency();
+  const debt = useAnimatedNumber(
+    fromCanonicalUsd(profile.outstandingDebt, currency),
+  );
+  const loan = useAnimatedNumber(fromCanonicalUsd(profile.loanAmount, currency));
   const burden = useAnimatedNumber(Math.round(debtBurdenRatio(profile)));
 
   return (
@@ -86,11 +91,11 @@ export function ProfileRail({ profile, className }: ProfileRailProps) {
       <div className="grid grid-cols-3 gap-6 lg:grid-cols-1 lg:gap-8">
         <HeroStat
           label="( outstanding debt )"
-          value={formatFeatureValue("outstandingDebt", debt)}
+          value={formatMoney(debt, currency)}
         />
         <HeroStat
           label="( requested loan )"
-          value={formatFeatureValue("loanAmount", loan)}
+          value={formatMoney(loan, currency)}
         />
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-muted-foreground">
@@ -112,11 +117,11 @@ export function ProfileRail({ profile, className }: ProfileRailProps) {
       <Surface variant="inset" className="px-4 py-2">
         <MetaRow
           label="( years employed )"
-          value={formatFeatureValue("employmentYears", profile.employmentYears)}
+          value={formatFeatureValue("employmentYears", profile.employmentYears, currency)}
         />
         <MetaRow
           label="( delinquencies )"
-          value={formatFeatureValue("delinquencies", profile.delinquencies)}
+          value={formatFeatureValue("delinquencies", profile.delinquencies, currency)}
           emphasis={profile.delinquencies > 0}
         />
         <MetaRow
@@ -124,6 +129,7 @@ export function ProfileRail({ profile, className }: ProfileRailProps) {
           value={formatFeatureValue(
             "creditHistoryMonths",
             profile.creditHistoryMonths,
+            currency,
           )}
           last
         />

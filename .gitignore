@@ -2,5 +2,18 @@ node_modules/
 dist/
 .env
 .env.*
+!.env.example
 *.local
 .DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/artifacts/*
+!backend/artifacts/.gitkeep
+# Kaggle Give Me Some Credit dump — keep local; see README
+backend/data
+backend/data/*.csv
+backend/data/cs-training.csv
+!backend/data/.gitkeep
+demo/_raw/

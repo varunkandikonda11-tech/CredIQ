@@ -1,0 +1,14 @@
+# Render: Web Service, root backend/
+# Start: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+# Set CORS_ORIGINS to your Vercel URL.
+
+services:
+  - type: web
+    name: crediq-api
+    runtime: python
+    rootDir: backend
+    buildCommand: python -m pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OLLAMA_TIMEOUT_SECONDS
+        value: "20"

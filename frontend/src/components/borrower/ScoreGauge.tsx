@@ -6,7 +6,8 @@ import type { RiskTier } from "@/types/api";
 interface ScoreGaugeProps {
   score: number;
   tier: RiskTier;
-  size?: "hero" | "compact";
+  size?: "hero" | "compact" | "mini";
+  caption?: string;
 }
 
 const TIER_GLOW: Record<RiskTier, string> = {
@@ -24,29 +25,31 @@ export function ScoreGauge({
   score,
   tier,
   size = "hero",
+  caption,
 }: ScoreGaugeProps) {
   const display = useAnimatedNumber(score);
   const progress = Math.min(1, Math.max(0, (score - 300) / 550));
   const dashOffset = ARC_LENGTH * (1 - progress);
   const isHero = size === "hero";
+  const isMini = size === "mini";
 
   return (
     <div
       className={cn(
         "relative mx-auto",
-        isHero
-          ? "h-[min(42vw,420px)] w-[min(42vw,420px)]"
-          : "h-56 w-56",
+        isHero && "h-[min(42vw,420px)] w-[min(42vw,420px)]",
+        size === "compact" && "h-56 w-56",
+        isMini && "h-40 w-40",
       )}
     >
       <svg viewBox="0 0 220 220" className="h-full w-full -rotate-[225deg]">
         <defs>
-          <linearGradient id="gauge-stroke" x1="0%" y1="100%" x2="100%" y2="0%">
+          <linearGradient id={`gauge-stroke-${size}`} x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#9b1c2e" />
             <stop offset="52%" stopColor="#fbbf24" />
             <stop offset="100%" stopColor="#34d399" />
           </linearGradient>
-          <filter id="gauge-glow" x="-40%" y="-40%" width="180%" height="180%">
+          <filter id={`gauge-glow-${size}`} x="-40%" y="-40%" width="180%" height="180%">
             <feGaussianBlur stdDeviation="4.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
@@ -60,7 +63,7 @@ export function ScoreGauge({
           r={RADIUS}
           fill="none"
           stroke="rgba(255,255,255,0.06)"
-          strokeWidth={isHero ? 16 : 14}
+          strokeWidth={isHero ? 16 : isMini ? 12 : 14}
           strokeLinecap="round"
           strokeDasharray={`${ARC_LENGTH} ${CIRCUMFERENCE}`}
         />
@@ -69,11 +72,11 @@ export function ScoreGauge({
           cy="110"
           r={RADIUS}
           fill="none"
-          stroke="url(#gauge-stroke)"
-          strokeWidth={isHero ? 16 : 14}
+          stroke={`url(#gauge-stroke-${size})`}
+          strokeWidth={isHero ? 16 : isMini ? 12 : 14}
           strokeLinecap="round"
           strokeDasharray={`${ARC_LENGTH} ${CIRCUMFERENCE}`}
-          filter="url(#gauge-glow)"
+          filter={`url(#gauge-glow-${size})`}
           style={{ filter: `drop-shadow(0 0 18px ${TIER_GLOW[tier]})` }}
           animate={{ strokeDashoffset: dashOffset }}
           initial={{ strokeDashoffset: ARC_LENGTH }}
@@ -87,13 +90,13 @@ export function ScoreGauge({
         <span
           className={cn(
             "font-bold tracking-tighter tabular-nums",
-            isHero ? "text-7xl md:text-8xl" : "text-5xl",
+            isHero ? "text-7xl md:text-8xl" : isMini ? "text-4xl" : "text-5xl",
           )}
         >
           {display}
         </span>
         <span className="mt-1 font-mono text-[11px] uppercase tracking-[0.35em] text-muted-foreground">
-          score
+          {caption ?? "score"}
         </span>
       </div>
     </div>

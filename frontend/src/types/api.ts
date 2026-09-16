@@ -15,6 +15,8 @@ export interface PredictionResponse {
   probability: number;
   tier: RiskTier;
   insight: string;
+  threshold?: number;
+  flagged?: boolean;
 }
 
 export interface WhatIfRequest {
@@ -28,8 +30,16 @@ export interface ShapFactor {
   impact: number;
 }
 
+export interface ShapGroup {
+  key: "lates" | "utilization" | "income" | "leverage";
+  label: string;
+  impact: number;
+  members: ShapFactor[];
+}
+
 export interface ExplainResponse {
   factors: ShapFactor[];
+  groups?: ShapGroup[];
 }
 
 export interface FeatureMeta {
@@ -39,4 +49,27 @@ export interface FeatureMeta {
   max: number;
   step: number;
   unit?: string;
+}
+
+export interface ApplicantRecord extends BorrowerInput {
+  id: string;
+  name: string;
+}
+
+export interface ApplicantResult extends ApplicantRecord, PredictionResponse {}
+
+export interface PortfolioSummary {
+  totalApplicants: number;
+  avgScore: number;
+  avgProbability: number;
+  tierCounts: Record<RiskTier, number>;
+}
+
+export interface BatchPredictRequest {
+  applicants: ApplicantRecord[];
+}
+
+export interface BatchPredictResponse {
+  applicants: ApplicantResult[];
+  summary: PortfolioSummary;
 }

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { RiskTierBadge } from "@/components/borrower/RiskTierBadge";
 import { formatFeatureValue } from "@/lib/featureLabels";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/context/CurrencyContext";
 import type { BorrowerInput, PredictionResponse } from "@/types/api";
 
 interface ScoreMetaPanelProps {
@@ -17,6 +18,7 @@ export function ScoreMetaPanel({
   profile,
   className,
 }: ScoreMetaPanelProps) {
+  const { currency } = useCurrency();
   const tier = prediction?.tier ?? "medium";
   const sign = delta > 0 ? "+" : "";
 
@@ -60,7 +62,7 @@ export function ScoreMetaPanel({
             ( annual income )
           </p>
           <p className="mt-2 text-4xl font-bold tracking-tight md:text-5xl">
-            {formatFeatureValue("annualIncome", profile.annualIncome)}
+            {formatFeatureValue("annualIncome", profile.annualIncome, currency)}
           </p>
         </div>
         <div>
@@ -68,7 +70,7 @@ export function ScoreMetaPanel({
             ( credit utilization )
           </p>
           <p className="mt-2 text-4xl font-bold tracking-tight md:text-5xl">
-            {formatFeatureValue("creditUtilization", profile.creditUtilization)}
+            {formatFeatureValue("creditUtilization", profile.creditUtilization, currency)}
           </p>
         </div>
       </div>

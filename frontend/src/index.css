@@ -140,3 +140,20 @@ body {
   border: 1px solid #26262b !important;
   border-radius: 12px !important;
 }
+
+@media print {
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .score-report {
+    display: block !important;
+    padding: 24px;
+    color: #111;
+  }
+}

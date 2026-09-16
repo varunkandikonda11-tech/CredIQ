@@ -21,12 +21,22 @@ export function useWhatIfSimulator({
     useState<PredictionResponse | null>(null);
   const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
   const [factors, setFactors] = useState<ShapFactor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    predict(baseline).then((result) => {
-      if (!cancelled) setBaselinePrediction(result);
-    });
+    predict(baseline)
+      .then((result) => {
+        if (!cancelled) setBaselinePrediction(result);
+      })
+      .catch((reason: unknown) => {
+        if (!cancelled) {
+          setError(
+            reason instanceof Error ? reason.message : "Could not score profile.",
+          );
+        }
+      });
     return () => {
       cancelled = true;
     };
@@ -34,9 +44,25 @@ export function useWhatIfSimulator({
 
   useEffect(() => {
     let cancelled = false;
-    whatIf({ baseline, changes: profile }).then((result) => {
-      if (!cancelled) setPrediction(result);
-    });
+    if (!prediction) setLoading(true);
+    whatIf({ baseline, changes: profile })
+      .then((result) => {
+        if (cancelled) return;
+        setPrediction(result);
+        setError(null);
+      })
+      .catch((reason: unknown) => {
+        if (!cancelled) {
+          setError(
+            reason instanceof Error
+              ? reason.message
+              : "Could not update score.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -45,9 +71,13 @@ export function useWhatIfSimulator({
   useEffect(() => {
     let cancelled = false;
     const timer = window.setTimeout(() => {
-      explain(profile).then((result) => {
-        if (!cancelled) setFactors(result.factors);
-      });
+      explain(profile)
+        .then((result) => {
+          if (!cancelled) setFactors(result.factors);
+        })
+        .catch(() => {
+          if (!cancelled) setFactors([]);
+        });
     }, 100);
     return () => {
       cancelled = true;
@@ -65,5 +95,7 @@ export function useWhatIfSimulator({
     baselinePrediction,
     factors,
     delta,
+    loading,
+    error,
   };
 }

@@ -1,3 +1,5 @@
+import type { Currency } from "@/lib/currency";
+import { formatMoney, fromCanonicalUsd, isMoneyKey } from "@/lib/currency";
 import type { BorrowerInput } from "@/types/api";
 
 export const FEATURE_LABELS: Record<keyof BorrowerInput, string> = {
@@ -13,12 +15,13 @@ export const FEATURE_LABELS: Record<keyof BorrowerInput, string> = {
 export function formatFeatureValue(
   key: keyof BorrowerInput,
   value: number,
+  currency: Currency = "USD",
 ): string {
+  if (isMoneyKey(key)) {
+    return formatMoney(fromCanonicalUsd(value, currency), currency);
+  }
+
   switch (key) {
-    case "annualIncome":
-    case "outstandingDebt":
-    case "loanAmount":
-      return `$${Math.round(value).toLocaleString("en-US")}`;
     case "creditUtilization":
       return `${Math.round(value)}%`;
     case "creditHistoryMonths": {
